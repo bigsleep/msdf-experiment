@@ -25,6 +25,7 @@ gen_msdf() {
     read_metrics $1 $2 codepoint minx miny maxx maxy advance range
     read -r transx transy width height < <(./scripts/calc.rb <<<"$minx $miny $maxx $maxy $range $scale")
     $MSDFGEN msdf -font $font $codepoint -o resource/msdf$codepoint.png -translate $transx $transy -size $width $height -scale $scale -range $range
+    echo $transx $transy $advance $range $scale
 }
 
 if [ $# -ne 1 ]; then
@@ -34,7 +35,18 @@ fi
 font=$1
 first=33
 last=126
+metrics="{\n"
 
 for i in $(seq $first $last); do
-    gen_msdf $font $i
+    m="\""$i"\": "$(gen_msdf $font $i |
+        xargs -n5 sh -c 'printf "{\"translatex\":$0,\"translatey\":$1,\"advance\":$2,\"range\":$3,\"scale\":$4}"')
+    if [ $i == $last ]; then
+        metrics+=$m"\n"
+    else
+        metrics+=$m",\n"
+    fi
 done
+
+metrics+="}"
+
+echo -e $metrics
