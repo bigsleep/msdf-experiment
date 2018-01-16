@@ -33,7 +33,7 @@ if [ $# -ne 1 ]; then
 fi
 
 font=$1
-first=33
+first=32
 last=126
 metrics="{\n"
 
