@@ -6,6 +6,25 @@
 
 <body>
 
+<script id="vertexShader" type="x-shader/x-vertex">
+void main()	{
+    gl_Position = vec4(position, 1.0);
+
+}
+</script>
+
+<script id="msdfFragmentShader" type="x-shader/x-fragment">
+uniform vec2 iResolution;
+uniform sampler2D iTexture;
+uniform vec2 iTextureSize;
+
+void main()
+{
+    vec2 textureCoord = gl_FragCoord.xy / iResolution;
+    gl_FragColor = texture2D(iTexture, textureCoord);
+}
+</script>
+
 <div id="root">
 </div>
 
