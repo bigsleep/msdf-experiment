@@ -24,7 +24,7 @@ read_metrics() {
 gen_msdf() {
     read_metrics $1 $2 codepoint minx miny maxx maxy advance range
     read -r transx transy width height < <(./scripts/calc.rb <<<"$minx $miny $maxx $maxy $range $scale")
-    $MSDFGEN msdf -font $font $codepoint -o resource/msdf$codepoint.png -translate $transx $transy -size $width $height -scale $scale -range $range
+    $MSDFGEN msdf -font $font $codepoint -o msdfs/$codepoint.png -translate $transx $transy -size $width $height -scale $scale -range $range
     echo $transx $transy $advance $range $scale
 }
 
@@ -49,4 +49,4 @@ done
 
 metrics+="}"
 
-echo -e $metrics
+echo -e $metrics > "src/metrics.json"

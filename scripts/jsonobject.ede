@@ -1,0 +1,9 @@
+{ {% for item in items %}{% if !item.first %},{% endif %}"{{ item.value.sourceName | stripPrefix("msdf") | stripSuffix(".png") }}":
+    { "name" : "{{ item.value.sourceName }}"
+    , "texture" : {{ item.value.textureIndex }}
+    , "position" : [{% for x in item.value.position %}{{x.value}}{% if !x.last %}, {% endif %}{% endfor %}]
+    , "size" : [{% for x in item.value.size %}{{x.value}}{% if !x.last %}, {% endif %}{% endfor %}]
+    , "rotated" : {{ item.value.rotated }}
+    }
+{% endfor %}
+}
