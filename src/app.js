@@ -7,6 +7,7 @@ import metrics from './metrics.json';
 
 const shaderNames = [
     "msdfFragmentShader",
+    "rawFragmentShader",
 ];
 
 const textureNames = [

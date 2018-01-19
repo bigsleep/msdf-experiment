@@ -41,6 +41,18 @@ void main()
 }
 </script>
 
+<script id="rawFragmentShader" type="x-shader/x-fragment">
+varying vec2 textureCoord;
+uniform vec2 iResolution;
+uniform sampler2D iTexture;
+uniform vec2 iTextureSize;
+
+void main()
+{
+    gl_FragColor = texture2D(iTexture, textureCoord);
+}
+</script>
+
 <div id="root">
 </div>
 
