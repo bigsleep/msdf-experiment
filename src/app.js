@@ -129,23 +129,19 @@ class App {
     }
 
     initialize(container, shaderName, textureUrl, onUpdate) {
-        console.log("initialize");
-        console.log(textureUrl);
         const self = this;
         const shader = document.getElementById(shaderName).textContent;
         this.onUpdate = onUpdate;
         this.loadTexture(textureUrl)
             .then(texture => {
-                console.log("aaa");
                 self.initializeThree(container, shader, texture);
             });
     }
 
     initializeThree(container, fragmentShader, texture) {
-        console.log("initializeThree");
         this.state.uniforms.iTexture =  { type: "t", value: texture };
         this.state.uniforms.iTextureSize = { type: "v2", value: new THREE.Vector2(texture.image.width, texture.image.width) };
-        this.three.camera =new THREE.PerspectiveCamera( 45, this.width / this.height, 1, 10000 );// new THREE.OrthographicCamera(0.0, 1.0, 1.0, 0.0, 1.0, 1000.0);
+        this.three.camera =new THREE.PerspectiveCamera( 45, this.width / this.height, 1, 10000 );
         this.three.camera.position.set( 0, 20, 100 );
         this.three.camera.up = new THREE.Vector3(0.0, 1.0, 0.0);
         this.three.camera.lookAt(new THREE.Vector3(0.0, 0.0, 0.0));
@@ -169,7 +165,6 @@ class App {
 
         this.three.geometry = new THREE.BufferGeometry();
         this.changeText("Hello, world");
-        console.log(this.three.geometry);
         this.three.material = new THREE.ShaderMaterial({
             uniforms: this.state.uniforms,
             vertexShader: document.getElementById('vertexShader').textContent,
@@ -181,7 +176,6 @@ class App {
         this.three.scene.add(this.three.mesh);
 
         this.animate();
-        console.log("initializeThree end");
     }
 
     animate() {
