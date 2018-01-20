@@ -65723,7 +65723,7 @@ exports = module.exports = __webpack_require__(33)(false);
 
 
 // module
-exports.push([module.i, "html, body, .root, .root-container {\n    height: 100%;\n    box-sizing: border-box;\n    margin: 0;\n    border: 0;\n    padding: 0;\n}\n\n.root-container {\n    display: flex;\n    flex-direction: column;\n    justify-content: center;\n    align-items: stretch;\n}\n\n.root-container-item {\n    margin: 5px;\n}\n\n.root-container-main {\n    flex-grow: 1;\n}\n\n.control-container {\n    margin: 10px;\n}\n\n.control-container-item {\n    display: flex;\n    flex-direction: row;\n    align-items: center;\n}\n\n.control-label {\n    flex: 1;\n}\n\n.control {\n    flex: 2;\n}\n\n.three-view {\n    width: 100%;\n    height: 100%;\n}\n", ""]);
+exports.push([module.i, "html, body, .root, .root-container {\n    height: 100%;\n    box-sizing: border-box;\n    margin: 0;\n    border: 0;\n    padding: 0;\n}\n\n.root-container {\n    display: flex;\n    flex-direction: column;\n    justify-content: center;\n    align-items: stretch;\n}\n\n.root-container-item {\n    margin: 5px;\n}\n\n.root-container-main {\n    flex: 1;\n}\n\n.control-container {\n    margin: 10px;\n}\n\n.control-container-item {\n    display: flex;\n    flex-direction: row;\n    align-items: center;\n}\n\n.control-label {\n    flex: 1;\n}\n\n.control {\n    flex: 2;\n}\n\n.three-view {\n    width: 100%;\n    height: 100%;\n    box-sizing: border-box;\n}\n", ""]);
 
 // exports
 
