@@ -14,8 +14,11 @@ html, body, .root, .root-container {
 }
 
 .root-container-item {
-    flex-grow: 1;
     margin: 5px;
+}
+
+.root-container-main {
+    flex-grow: 1;
 }
 
 .control-container {

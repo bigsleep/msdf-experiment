@@ -231,7 +231,7 @@ class View extends React.Component {
                         </div>
                     </div>
                 </div>
-                <div className="root-container-item">
+                <div className="root-container-item root-container-main">
                     <ThreeView app={this.props.app} />
                 </div>
             </div>
