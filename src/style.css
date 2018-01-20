@@ -1,6 +1,5 @@
 html, body, .root, .root-container {
     height: 100%;
-    box-sizing: border-box;
     margin: 0;
     border: 0;
     padding: 0;
@@ -10,7 +9,6 @@ html, body, .root, .root-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: stretch;
 }
 
 .root-container-item {
@@ -19,6 +17,9 @@ html, body, .root, .root-container {
 
 .root-container-main {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .control-container {
@@ -26,6 +27,7 @@ html, body, .root, .root-container {
 }
 
 .control-container-item {
+    margin: 2px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -40,7 +42,5 @@ html, body, .root, .root-container {
 }
 
 .three-view {
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
+    flex: 1;
 }
