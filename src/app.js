@@ -4,6 +4,7 @@ import 'three';
 import 'three/OrbitControls';
 import metaData from './metadata.json';
 import metrics from './metrics.json';
+import './style.css';
 
 const shaderNames = [
     "msdfFragmentShader",
@@ -25,14 +26,14 @@ const filterTypes = [
 ];
 
 class App {
-    constructor(width, height) {
-        this.width = width;
-        this.height = height;
+    constructor() {
         this.state = {
+            width: 0,
+            height: 0,
             text: "",
             fragmentShader: null,
             uniforms: {
-                iResolution: {type: "v2", value: new THREE.Vector2(this.width, this.height)},
+                iResolution: {type: "v2", value: new THREE.Vector2(0, 0)},
             }
         }
 
@@ -47,6 +48,14 @@ class App {
                 resolve(texture);
             });
         });
+    }
+
+    changeSize(width, height) {
+        this.state.width = width;
+        this.state.height = height;
+        this.state.uniforms.iResolution.value = new THREE.Vector2(width, height);
+        this.state.uniforms.needsUpdate = true;
+        this.onUpdate(this.state);
     }
 
     changeTexture(textureUrl) {
@@ -139,20 +148,23 @@ class App {
     }
 
     initializeThree(container, fragmentShader, texture) {
+        // initialize renderer and size
+        this.three.renderer = new THREE.WebGLRenderer();
+        container.appendChild(this.three.renderer.domElement);
+        this.changeSize(container.clientWidth, container.clientHeight);
+        this.three.renderer.setSize(this.state.width, this.state.height);
+        this.three.renderer.setPixelRatio(window.devicePixelRatio);
+        this.three.renderer.setClearColor(new THREE.Color(0xF0F0F0));
+
+        // initialize camera
         this.state.uniforms.iTexture =  { type: "t", value: texture };
         this.state.uniforms.iTextureSize = { type: "v2", value: new THREE.Vector2(texture.image.width, texture.image.width) };
-        this.three.camera =new THREE.PerspectiveCamera( 45, this.width / this.height, 1, 10000 );
+        this.three.camera =new THREE.PerspectiveCamera( 45, this.state.width / this.state.height, 1, 10000 );
         this.three.camera.position.set( 0, 20, 100 );
         this.three.camera.up = new THREE.Vector3(0.0, 1.0, 0.0);
         this.three.camera.lookAt(new THREE.Vector3(0.0, 0.0, 0.0));
 
         this.three.scene = new THREE.Scene();
-
-        this.three.renderer = new THREE.WebGLRenderer();
-        this.three.renderer.setSize(this.width, this.height);
-        this.three.renderer.setPixelRatio(window.devicePixelRatio);
-        this.three.renderer.setClearColor(new THREE.Color(0xF0F0F0));
-        container.appendChild(this.three.renderer.domElement);
 
         new THREE.OrbitControls(this.three.camera, this.three.renderer.domElement);
 
@@ -194,25 +206,34 @@ class App {
 class View extends React.Component {
     render() {
         return (
-            <div>
-                <div>
-                    <label>
-                        text <input type="text" onKeyUp={e => this.props.app.changeText(e.target.value)} />
-                    </label>
-                    <label>
-                        fragment shader <Select optionValues={shaderNames} optionNames={shaderNames} onChange={selected => this.props.app.changeShader(selected)} />
-                    </label>
-                    <label>
-                        texture <Select optionValues={textureNames} optionNames={textureNames} onChange={selected => this.props.app.changeTexture(selected)} />
-                    </label>
-                    <label>
-                        min filter <Select optionValues={filterTypes} optionNames={filterNames} onChange={selected => this.props.app.changeTextureMinFilter(selected)} />
-                    </label>
-                    <label>
-                        mag filter <Select optionValues={filterTypes} optionNames={filterNames} onChange={selected => this.props.app.changeTextureMagFilter(selected)} />
-                    </label>
+            <div className="root-container">
+                <div className="root-container-item">
+                    <div className="control-container">
+                        <div className="control-container-item">
+                            <label className="control-label">text</label>
+                            <input type="text" onKeyUp={e => this.props.app.changeText(e.target.value)} className="control" />
+                        </div>
+                        <div className="control-container-item">
+                            <label className="control-label">fragment shader</label>
+                            <Select optionValues={shaderNames} optionNames={shaderNames} onChange={selected => this.props.app.changeShader(selected)} className="control" />
+                        </div>
+                        <div className="control-container-item">
+                            <label className="control-label">texture</label>
+                            <Select optionValues={textureNames} optionNames={textureNames} onChange={selected => this.props.app.changeTexture(selected)} className="control" />
+                        </div>
+                        <div className="control-container-item">
+                            <label className="control-label">min filter</label>
+                            <Select optionValues={filterTypes} optionNames={filterNames} onChange={selected => this.props.app.changeTextureMinFilter(selected)} className="control" />
+                        </div>
+                        <div className="control-container-item">
+                            <label className="control-label">mag filter</label>
+                            <Select optionValues={filterTypes} optionNames={filterNames} onChange={selected => this.props.app.changeTextureMagFilter(selected)} className="control" />
+                        </div>
+                    </div>
                 </div>
-                <ThreeView app={this.props.app} />
+                <div className="root-container-item">
+                    <ThreeView app={this.props.app} />
+                </div>
             </div>
         );
     }
@@ -224,7 +245,7 @@ class ThreeView extends React.Component {
     }
 
     render() {
-        return <div className="threeView" ref={thisNode => {this.container = thisNode}}></div>;
+        return <div className="three-view" ref={thisNode => {this.container = thisNode}}></div>;
     }
 }
 
@@ -244,5 +265,6 @@ class Select extends React.Component {
     }
 }
 
-const app = new App(600.0, 400.0);
-ReactDOM.render(<View app={app} />, document.getElementById('root'));
+const rootElement = document.getElementById('root');
+const app = new App();
+ReactDOM.render(<View app={app}/>, rootElement);

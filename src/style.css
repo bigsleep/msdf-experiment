@@ -1,0 +1,42 @@
+html, body, .root, .root-container {
+    height: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    border: 0;
+    padding: 0;
+}
+
+.root-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.root-container-item {
+    flex-grow: 1;
+    margin: 5px;
+}
+
+.control-container {
+    margin: 10px;
+}
+
+.control-container-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.control-label {
+    flex: 1;
+}
+
+.control {
+    flex: 2;
+}
+
+.three-view {
+    width: 100%;
+    height: 100%;
+}

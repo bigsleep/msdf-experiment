@@ -46944,6 +46944,8 @@ var _metrics = __webpack_require__(30);
 
 var _metrics2 = _interopRequireDefault(_metrics);
 
+__webpack_require__(31);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -46961,16 +46963,16 @@ var filterNames = ["Linear", "Nearest"];
 var filterTypes = [THREE.LinearFilter, THREE.NearestFilter];
 
 var App = function () {
-    function App(width, height) {
+    function App() {
         _classCallCheck(this, App);
 
-        this.width = width;
-        this.height = height;
         this.state = {
+            width: 0,
+            height: 0,
             text: "",
             fragmentShader: null,
             uniforms: {
-                iResolution: { type: "v2", value: new THREE.Vector2(this.width, this.height) }
+                iResolution: { type: "v2", value: new THREE.Vector2(0, 0) }
             }
         };
 
@@ -46987,6 +46989,15 @@ var App = function () {
                     resolve(texture);
                 });
             });
+        }
+    }, {
+        key: 'changeSize',
+        value: function changeSize(width, height) {
+            this.state.width = width;
+            this.state.height = height;
+            this.state.uniforms.iResolution.value = new THREE.Vector2(width, height);
+            this.state.uniforms.needsUpdate = true;
+            this.onUpdate(this.state);
         }
     }, {
         key: 'changeTexture',
@@ -47062,34 +47073,33 @@ var App = function () {
     }, {
         key: 'initialize',
         value: function initialize(container, shaderName, textureUrl, onUpdate) {
-            console.log("initialize");
-            console.log(textureUrl);
             var self = this;
             var shader = document.getElementById(shaderName).textContent;
             this.onUpdate = onUpdate;
             this.loadTexture(textureUrl).then(function (texture) {
-                console.log("aaa");
                 self.initializeThree(container, shader, texture);
             });
         }
     }, {
         key: 'initializeThree',
         value: function initializeThree(container, fragmentShader, texture) {
-            console.log("initializeThree");
+            // initialize renderer and size
+            this.three.renderer = new THREE.WebGLRenderer();
+            container.appendChild(this.three.renderer.domElement);
+            this.changeSize(container.clientWidth, container.clientHeight);
+            this.three.renderer.setSize(this.state.width, this.state.height);
+            this.three.renderer.setPixelRatio(window.devicePixelRatio);
+            this.three.renderer.setClearColor(new THREE.Color(0xF0F0F0));
+
+            // initialize camera
             this.state.uniforms.iTexture = { type: "t", value: texture };
             this.state.uniforms.iTextureSize = { type: "v2", value: new THREE.Vector2(texture.image.width, texture.image.width) };
-            this.three.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 10000); // new THREE.OrthographicCamera(0.0, 1.0, 1.0, 0.0, 1.0, 1000.0);
+            this.three.camera = new THREE.PerspectiveCamera(45, this.state.width / this.state.height, 1, 10000);
             this.three.camera.position.set(0, 20, 100);
             this.three.camera.up = new THREE.Vector3(0.0, 1.0, 0.0);
             this.three.camera.lookAt(new THREE.Vector3(0.0, 0.0, 0.0));
 
             this.three.scene = new THREE.Scene();
-
-            this.three.renderer = new THREE.WebGLRenderer();
-            this.three.renderer.setSize(this.width, this.height);
-            this.three.renderer.setPixelRatio(window.devicePixelRatio);
-            this.three.renderer.setClearColor(new THREE.Color(0xF0F0F0));
-            container.appendChild(this.three.renderer.domElement);
 
             new THREE.OrbitControls(this.three.camera, this.three.renderer.domElement);
 
@@ -47102,7 +47112,6 @@ var App = function () {
 
             this.three.geometry = new THREE.BufferGeometry();
             this.changeText("Hello, world");
-            console.log(this.three.geometry);
             this.three.material = new THREE.ShaderMaterial({
                 uniforms: this.state.uniforms,
                 vertexShader: document.getElementById('vertexShader').textContent,
@@ -47114,7 +47123,6 @@ var App = function () {
             this.three.scene.add(this.three.mesh);
 
             this.animate();
-            console.log("initializeThree end");
         }
     }, {
         key: 'animate',
@@ -47153,52 +47161,80 @@ var View = function (_React$Component) {
 
             return _react2.default.createElement(
                 'div',
-                null,
+                { className: 'root-container' },
                 _react2.default.createElement(
                     'div',
-                    null,
+                    { className: 'root-container-item' },
                     _react2.default.createElement(
-                        'label',
-                        null,
-                        'text ',
-                        _react2.default.createElement('input', { type: 'text', onKeyUp: function onKeyUp(e) {
-                                return _this3.props.app.changeText(e.target.value);
-                            } })
-                    ),
-                    _react2.default.createElement(
-                        'label',
-                        null,
-                        'fragment shader ',
-                        _react2.default.createElement(Select, { optionValues: shaderNames, optionNames: shaderNames, onChange: function onChange(selected) {
-                                return _this3.props.app.changeShader(selected);
-                            } })
-                    ),
-                    _react2.default.createElement(
-                        'label',
-                        null,
-                        'texture ',
-                        _react2.default.createElement(Select, { optionValues: textureNames, optionNames: textureNames, onChange: function onChange(selected) {
-                                return _this3.props.app.changeTexture(selected);
-                            } })
-                    ),
-                    _react2.default.createElement(
-                        'label',
-                        null,
-                        'min filter ',
-                        _react2.default.createElement(Select, { optionValues: filterTypes, optionNames: filterNames, onChange: function onChange(selected) {
-                                return _this3.props.app.changeTextureMinFilter(selected);
-                            } })
-                    ),
-                    _react2.default.createElement(
-                        'label',
-                        null,
-                        'mag filter ',
-                        _react2.default.createElement(Select, { optionValues: filterTypes, optionNames: filterNames, onChange: function onChange(selected) {
-                                return _this3.props.app.changeTextureMagFilter(selected);
-                            } })
+                        'div',
+                        { className: 'control-container' },
+                        _react2.default.createElement(
+                            'div',
+                            { className: 'control-container-item' },
+                            _react2.default.createElement(
+                                'label',
+                                { className: 'control-label' },
+                                'text'
+                            ),
+                            _react2.default.createElement('input', { type: 'text', onKeyUp: function onKeyUp(e) {
+                                    return _this3.props.app.changeText(e.target.value);
+                                }, className: 'control' })
+                        ),
+                        _react2.default.createElement(
+                            'div',
+                            { className: 'control-container-item' },
+                            _react2.default.createElement(
+                                'label',
+                                { className: 'control-label' },
+                                'fragment shader'
+                            ),
+                            _react2.default.createElement(Select, { optionValues: shaderNames, optionNames: shaderNames, onChange: function onChange(selected) {
+                                    return _this3.props.app.changeShader(selected);
+                                }, className: 'control' })
+                        ),
+                        _react2.default.createElement(
+                            'div',
+                            { className: 'control-container-item' },
+                            _react2.default.createElement(
+                                'label',
+                                { className: 'control-label' },
+                                'texture'
+                            ),
+                            _react2.default.createElement(Select, { optionValues: textureNames, optionNames: textureNames, onChange: function onChange(selected) {
+                                    return _this3.props.app.changeTexture(selected);
+                                }, className: 'control' })
+                        ),
+                        _react2.default.createElement(
+                            'div',
+                            { className: 'control-container-item' },
+                            _react2.default.createElement(
+                                'label',
+                                { className: 'control-label' },
+                                'min filter'
+                            ),
+                            _react2.default.createElement(Select, { optionValues: filterTypes, optionNames: filterNames, onChange: function onChange(selected) {
+                                    return _this3.props.app.changeTextureMinFilter(selected);
+                                }, className: 'control' })
+                        ),
+                        _react2.default.createElement(
+                            'div',
+                            { className: 'control-container-item' },
+                            _react2.default.createElement(
+                                'label',
+                                { className: 'control-label' },
+                                'mag filter'
+                            ),
+                            _react2.default.createElement(Select, { optionValues: filterTypes, optionNames: filterNames, onChange: function onChange(selected) {
+                                    return _this3.props.app.changeTextureMagFilter(selected);
+                                }, className: 'control' })
+                        )
                     )
                 ),
-                _react2.default.createElement(ThreeView, { app: this.props.app })
+                _react2.default.createElement(
+                    'div',
+                    { className: 'root-container-item' },
+                    _react2.default.createElement(ThreeView, { app: this.props.app })
+                )
             );
         }
     }]);
@@ -47225,7 +47261,7 @@ var ThreeView = function (_React$Component2) {
         value: function render() {
             var _this5 = this;
 
-            return _react2.default.createElement('div', { className: 'threeView', ref: function ref(thisNode) {
+            return _react2.default.createElement('div', { className: 'three-view', ref: function ref(thisNode) {
                     _this5.container = thisNode;
                 } });
         }
@@ -47273,8 +47309,9 @@ var Select = function (_React$Component3) {
     return Select;
 }(_react2.default.Component);
 
-var app = new App(600.0, 400.0);
-_reactDom2.default.render(_react2.default.createElement(View, { app: app }), document.getElementById('root'));
+var rootElement = document.getElementById('root');
+var app = new App();
+_reactDom2.default.render(_react2.default.createElement(View, { app: app }), rootElement);
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
@@ -65645,6 +65682,600 @@ module.exports = {"32":{"name":"32.png","texture":0,"position":[153,51],"size":[
 /***/ (function(module, exports) {
 
 module.exports = {"32":{"translatex":2,"translatey":2,"advance":16,"range":2,"scale":2},"33":{"translatex":-3.1875,"translatey":2.3125,"advance":16,"range":2,"scale":2},"34":{"translatex":-2,"translatey":-11.03125,"advance":16,"range":2,"scale":2},"35":{"translatex":1.390625,"translatey":1.78125,"advance":16,"range":2,"scale":2},"36":{"translatex":0.4375,"translatey":3.40625,"advance":16,"range":2,"scale":2},"37":{"translatex":1.578125,"translatey":2.3125,"advance":16,"range":2,"scale":2},"38":{"translatex":1.046875,"translatey":2.671875,"advance":16,"range":2,"scale":2},"39":{"translatex":-4.40625,"translatey":-11.03125,"advance":16,"range":2,"scale":2},"40":{"translatex":-1.359375,"translatey":7.828125,"advance":16,"range":2,"scale":2},"41":{"translatex":-1.359375,"translatey":7.828125,"advance":16,"range":2,"scale":2},"42":{"translatex":0.96875,"translatey":-1.75,"advance":16,"range":2,"scale":2},"43":{"translatex":0.6875,"translatey":-1.453125,"advance":16,"range":2,"scale":2},"44":{"translatex":-2.765625,"translatey":7.40625,"advance":16,"range":2,"scale":2},"45":{"translatex":-0.046875,"translatey":-6.796875,"advance":16,"range":2,"scale":2},"46":{"translatex":-3.5,"translatey":2.421875,"advance":16,"range":2,"scale":2},"47":{"translatex":0.34375,"translatey":3.5,"advance":16,"range":2,"scale":2},"48":{"translatex":0.90625,"translatey":2.609375,"advance":16,"range":2,"scale":2},"49":{"translatex":-0.40625,"translatey":2,"advance":16,"range":2,"scale":2},"50":{"translatex":0.65625,"translatey":2,"advance":16,"range":2,"scale":2},"51":{"translatex":0.8125,"translatey":2.609375,"advance":16,"range":2,"scale":2},"52":{"translatex":0.90625,"translatey":2,"advance":16,"range":2,"scale":2},"53":{"translatex":0.296875,"translatey":2.609375,"advance":16,"range":2,"scale":2},"54":{"translatex":0.375,"translatey":2.609375,"advance":16,"range":2,"scale":2},"55":{"translatex":-0.109375,"translatey":2,"advance":16,"range":2,"scale":2},"56":{"translatex":0.65625,"translatey":2.609375,"advance":16,"range":2,"scale":2},"57":{"translatex":0.65625,"translatey":2.609375,"advance":16,"range":2,"scale":2},"58":{"translatex":-3.09375,"translatey":2.421875,"advance":16,"range":2,"scale":2},"59":{"translatex":-2.515625,"translatey":7.40625,"advance":16,"range":2,"scale":2},"60":{"translatex":0.96875,"translatey":0.75,"advance":16,"range":2,"scale":2},"61":{"translatex":0.6875,"translatey":-4.078125,"advance":16,"range":2,"scale":2},"62":{"translatex":0.8125,"translatey":0.75,"advance":16,"range":2,"scale":2},"63":{"translatex":0.234375,"translatey":2.421875,"advance":16,"range":2,"scale":2},"64":{"translatex":1.203125,"translatey":2.453125,"advance":16,"range":2,"scale":2},"65":{"translatex":1.6875,"translatey":2,"advance":16,"range":2,"scale":2},"66":{"translatex":0.71875,"translatey":2,"advance":16,"range":2,"scale":2},"67":{"translatex":1.078125,"translatey":2.578125,"advance":16,"range":2,"scale":2},"68":{"translatex":0.59375,"translatey":2,"advance":16,"range":2,"scale":2},"69":{"translatex":0.203125,"translatey":2,"advance":16,"range":2,"scale":2},"70":{"translatex":-0.171875,"translatey":2,"advance":16,"range":2,"scale":2},"71":{"translatex":1.484375,"translatey":2.578125,"advance":16,"range":2,"scale":2},"72":{"translatex":0.625,"translatey":2,"advance":16,"range":2,"scale":2},"73":{"translatex":-0.34375,"translatey":2,"advance":16,"range":2,"scale":2},"74":{"translatex":1.203125,"translatey":2.546875,"advance":16,"range":2,"scale":2},"75":{"translatex":0.625,"translatey":2.15625,"advance":16,"range":2,"scale":2},"76":{"translatex":0.046875,"translatey":2,"advance":16,"range":2,"scale":2},"77":{"translatex":1.046875,"translatey":2,"advance":16,"range":2,"scale":2},"78":{"translatex":0.96875,"translatey":2,"advance":16,"range":2,"scale":2},"79":{"translatex":1.453125,"translatey":2.578125,"advance":16,"range":2,"scale":2},"80":{"translatex":0.40625,"translatey":2,"advance":16,"range":2,"scale":2},"81":{"translatex":1.453125,"translatey":6.671875,"advance":16,"range":2,"scale":2},"82":{"translatex":0.5,"translatey":2,"advance":16,"range":2,"scale":2},"83":{"translatex":1.109375,"translatey":2.578125,"advance":16,"range":2,"scale":2},"84":{"translatex":1.359375,"translatey":2,"advance":16,"range":2,"scale":2},"85":{"translatex":0.8125,"translatey":2.453125,"advance":16,"range":2,"scale":2},"86":{"translatex":1.6875,"translatey":2,"advance":16,"range":2,"scale":2},"87":{"translatex":1.8125,"translatey":2,"advance":16,"range":2,"scale":2},"88":{"translatex":1.328125,"translatey":2,"advance":16,"range":2,"scale":2},"89":{"translatex":1.71875,"translatey":2,"advance":16,"range":2,"scale":2},"90":{"translatex":0.6875,"translatey":2,"advance":16,"range":2,"scale":2},"91":{"translatex":-1.78125,"translatey":4.875,"advance":16,"range":2,"scale":2},"92":{"translatex":0.375,"translatey":3.5,"advance":16,"range":2,"scale":2},"93":{"translatex":-1.859375,"translatey":4.875,"advance":16,"range":2,"scale":2},"94":{"translatex":-0.46875,"translatey":-8.625,"advance":16,"range":2,"scale":2},"95":{"translatex":1.078125,"translatey":5.234375,"advance":16,"range":2,"scale":2},"96":{"translatex":-2.765625,"translatey":-14.546875,"advance":16,"range":2,"scale":2},"97":{"translatex":0.71875,"translatey":2.390625,"advance":16,"range":2,"scale":2},"98":{"translatex":0.40625,"translatey":2.484375,"advance":16,"range":2,"scale":2},"99":{"translatex":0.78125,"translatey":2.515625,"advance":16,"range":2,"scale":2},"100":{"translatex":1.046875,"translatey":2.484375,"advance":16,"range":2,"scale":2},"101":{"translatex":0.8125,"translatey":2.515625,"advance":16,"range":2,"scale":2},"102":{"translatex":0.78125,"translatey":2,"advance":16,"range":2,"scale":2},"103":{"translatex":0.34375,"translatey":7.53125,"advance":16,"range":2,"scale":2},"104":{"translatex":0.078125,"translatey":2,"advance":16,"range":2,"scale":2},"105":{"translatex":-0.84375,"translatey":2,"advance":16,"range":2,"scale":2},"106":{"translatex":1.171875,"translatey":7.65625,"advance":16,"range":2,"scale":2},"107":{"translatex":0.078125,"translatey":2.125,"advance":16,"range":2,"scale":2},"108":{"translatex":-0.140625,"translatey":2,"advance":16,"range":2,"scale":2},"109":{"translatex":0.96875,"translatey":2,"advance":16,"range":2,"scale":2},"110":{"translatex":0.078125,"translatey":2,"advance":16,"range":2,"scale":2},"111":{"translatex":1.078125,"translatey":2.515625,"advance":16,"range":2,"scale":2},"112":{"translatex":0.265625,"translatey":7.34375,"advance":16,"range":2,"scale":2},"113":{"translatex":1.078125,"translatey":7.34375,"advance":16,"range":2,"scale":2},"114":{"translatex":-0.84375,"translatey":2,"advance":16,"range":2,"scale":2},"115":{"translatex":0.5,"translatey":2.515625,"advance":16,"range":2,"scale":2},"116":{"translatex":0.265625,"translatey":2.453125,"advance":16,"range":2,"scale":2},"117":{"translatex":0.375,"translatey":2.640625,"advance":16,"range":2,"scale":2},"118":{"translatex":1.203125,"translatey":2,"advance":16,"range":2,"scale":2},"119":{"translatex":1.75,"translatey":2,"advance":16,"range":2,"scale":2},"120":{"translatex":1.203125,"translatey":2,"advance":16,"range":2,"scale":2},"121":{"translatex":1.6875,"translatey":7.65625,"advance":16,"range":2,"scale":2},"122":{"translatex":0.625,"translatey":2,"advance":16,"range":2,"scale":2},"123":{"translatex":0.875,"translatey":7.09375,"advance":16,"range":2,"scale":2},"124":{"translatex":-4.296875,"translatey":6.828125,"advance":16,"range":2,"scale":2},"125":{"translatex":0.25,"translatey":7.09375,"advance":16,"range":2,"scale":2},"126":{"translatex":0.265625,"translatey":-6.859375,"advance":16,"range":2,"scale":2}}
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(32);
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {"hmr":true}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__(34)(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../node_modules/css-loader/index.js!./style.css", function() {
+			var newContent = require("!!../node_modules/css-loader/index.js!./style.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(33)(false);
+// imports
+
+
+// module
+exports.push([module.i, "html, body, .root, .root-container {\n    height: 100%;\n    box-sizing: border-box;\n    margin: 0;\n    border: 0;\n    padding: 0;\n}\n\n.root-container {\n    display: flex;\n    flex-direction: column;\n    justify-content: center;\n    align-items: stretch;\n}\n\n.root-container-item {\n    flex-grow: 1;\n    margin: 5px;\n}\n\n.control-container {\n    margin: 10px;\n}\n\n.control-container-item {\n    display: flex;\n    flex-direction: row;\n    align-items: center;\n}\n\n.control-label {\n    flex: 1;\n}\n\n.control {\n    flex: 2;\n}\n\n.three-view {\n    width: 100%;\n    height: 100%;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+module.exports = function(useSourceMap) {
+	var list = [];
+
+	// return the list of modules as css string
+	list.toString = function toString() {
+		return this.map(function (item) {
+			var content = cssWithMappingToString(item, useSourceMap);
+			if(item[2]) {
+				return "@media " + item[2] + "{" + content + "}";
+			} else {
+				return content;
+			}
+		}).join("");
+	};
+
+	// import a list of modules into the list
+	list.i = function(modules, mediaQuery) {
+		if(typeof modules === "string")
+			modules = [[null, modules, ""]];
+		var alreadyImportedModules = {};
+		for(var i = 0; i < this.length; i++) {
+			var id = this[i][0];
+			if(typeof id === "number")
+				alreadyImportedModules[id] = true;
+		}
+		for(i = 0; i < modules.length; i++) {
+			var item = modules[i];
+			// skip already imported module
+			// this implementation is not 100% perfect for weird media query combinations
+			//  when a module is imported multiple times with different media queries.
+			//  I hope this will never occur (Hey this way we have smaller bundles)
+			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+				if(mediaQuery && !item[2]) {
+					item[2] = mediaQuery;
+				} else if(mediaQuery) {
+					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+				}
+				list.push(item);
+			}
+		}
+	};
+	return list;
+};
+
+function cssWithMappingToString(item, useSourceMap) {
+	var content = item[1] || '';
+	var cssMapping = item[3];
+	if (!cssMapping) {
+		return content;
+	}
+
+	if (useSourceMap && typeof btoa === 'function') {
+		var sourceMapping = toComment(cssMapping);
+		var sourceURLs = cssMapping.sources.map(function (source) {
+			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
+		});
+
+		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
+	}
+
+	return [content].join('\n');
+}
+
+// Adapted from convert-source-map (MIT)
+function toComment(sourceMap) {
+	// eslint-disable-next-line no-undef
+	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
+	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
+
+	return '/*# ' + data + ' */';
+}
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+var stylesInDom = {};
+
+var	memoize = function (fn) {
+	var memo;
+
+	return function () {
+		if (typeof memo === "undefined") memo = fn.apply(this, arguments);
+		return memo;
+	};
+};
+
+var isOldIE = memoize(function () {
+	// Test for IE <= 9 as proposed by Browserhacks
+	// @see http://browserhacks.com/#hack-e71d8692f65334173fee715c222cb805
+	// Tests for existence of standard globals is to allow style-loader
+	// to operate correctly into non-standard environments
+	// @see https://github.com/webpack-contrib/style-loader/issues/177
+	return window && document && document.all && !window.atob;
+});
+
+var getElement = (function (fn) {
+	var memo = {};
+
+	return function(selector) {
+		if (typeof memo[selector] === "undefined") {
+			var styleTarget = fn.call(this, selector);
+			// Special case to return head of iframe instead of iframe itself
+			if (styleTarget instanceof window.HTMLIFrameElement) {
+				try {
+					// This will throw an exception if access to iframe is blocked
+					// due to cross-origin restrictions
+					styleTarget = styleTarget.contentDocument.head;
+				} catch(e) {
+					styleTarget = null;
+				}
+			}
+			memo[selector] = styleTarget;
+		}
+		return memo[selector]
+	};
+})(function (target) {
+	return document.querySelector(target)
+});
+
+var singleton = null;
+var	singletonCounter = 0;
+var	stylesInsertedAtTop = [];
+
+var	fixUrls = __webpack_require__(35);
+
+module.exports = function(list, options) {
+	if (typeof DEBUG !== "undefined" && DEBUG) {
+		if (typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
+	}
+
+	options = options || {};
+
+	options.attrs = typeof options.attrs === "object" ? options.attrs : {};
+
+	// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+	// tags it will allow on a page
+	if (!options.singleton && typeof options.singleton !== "boolean") options.singleton = isOldIE();
+
+	// By default, add <style> tags to the <head> element
+	if (!options.insertInto) options.insertInto = "head";
+
+	// By default, add <style> tags to the bottom of the target
+	if (!options.insertAt) options.insertAt = "bottom";
+
+	var styles = listToStyles(list, options);
+
+	addStylesToDom(styles, options);
+
+	return function update (newList) {
+		var mayRemove = [];
+
+		for (var i = 0; i < styles.length; i++) {
+			var item = styles[i];
+			var domStyle = stylesInDom[item.id];
+
+			domStyle.refs--;
+			mayRemove.push(domStyle);
+		}
+
+		if(newList) {
+			var newStyles = listToStyles(newList, options);
+			addStylesToDom(newStyles, options);
+		}
+
+		for (var i = 0; i < mayRemove.length; i++) {
+			var domStyle = mayRemove[i];
+
+			if(domStyle.refs === 0) {
+				for (var j = 0; j < domStyle.parts.length; j++) domStyle.parts[j]();
+
+				delete stylesInDom[domStyle.id];
+			}
+		}
+	};
+};
+
+function addStylesToDom (styles, options) {
+	for (var i = 0; i < styles.length; i++) {
+		var item = styles[i];
+		var domStyle = stylesInDom[item.id];
+
+		if(domStyle) {
+			domStyle.refs++;
+
+			for(var j = 0; j < domStyle.parts.length; j++) {
+				domStyle.parts[j](item.parts[j]);
+			}
+
+			for(; j < item.parts.length; j++) {
+				domStyle.parts.push(addStyle(item.parts[j], options));
+			}
+		} else {
+			var parts = [];
+
+			for(var j = 0; j < item.parts.length; j++) {
+				parts.push(addStyle(item.parts[j], options));
+			}
+
+			stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
+		}
+	}
+}
+
+function listToStyles (list, options) {
+	var styles = [];
+	var newStyles = {};
+
+	for (var i = 0; i < list.length; i++) {
+		var item = list[i];
+		var id = options.base ? item[0] + options.base : item[0];
+		var css = item[1];
+		var media = item[2];
+		var sourceMap = item[3];
+		var part = {css: css, media: media, sourceMap: sourceMap};
+
+		if(!newStyles[id]) styles.push(newStyles[id] = {id: id, parts: [part]});
+		else newStyles[id].parts.push(part);
+	}
+
+	return styles;
+}
+
+function insertStyleElement (options, style) {
+	var target = getElement(options.insertInto)
+
+	if (!target) {
+		throw new Error("Couldn't find a style target. This probably means that the value for the 'insertInto' parameter is invalid.");
+	}
+
+	var lastStyleElementInsertedAtTop = stylesInsertedAtTop[stylesInsertedAtTop.length - 1];
+
+	if (options.insertAt === "top") {
+		if (!lastStyleElementInsertedAtTop) {
+			target.insertBefore(style, target.firstChild);
+		} else if (lastStyleElementInsertedAtTop.nextSibling) {
+			target.insertBefore(style, lastStyleElementInsertedAtTop.nextSibling);
+		} else {
+			target.appendChild(style);
+		}
+		stylesInsertedAtTop.push(style);
+	} else if (options.insertAt === "bottom") {
+		target.appendChild(style);
+	} else if (typeof options.insertAt === "object" && options.insertAt.before) {
+		var nextSibling = getElement(options.insertInto + " " + options.insertAt.before);
+		target.insertBefore(style, nextSibling);
+	} else {
+		throw new Error("[Style Loader]\n\n Invalid value for parameter 'insertAt' ('options.insertAt') found.\n Must be 'top', 'bottom', or Object.\n (https://github.com/webpack-contrib/style-loader#insertat)\n");
+	}
+}
+
+function removeStyleElement (style) {
+	if (style.parentNode === null) return false;
+	style.parentNode.removeChild(style);
+
+	var idx = stylesInsertedAtTop.indexOf(style);
+	if(idx >= 0) {
+		stylesInsertedAtTop.splice(idx, 1);
+	}
+}
+
+function createStyleElement (options) {
+	var style = document.createElement("style");
+
+	options.attrs.type = "text/css";
+
+	addAttrs(style, options.attrs);
+	insertStyleElement(options, style);
+
+	return style;
+}
+
+function createLinkElement (options) {
+	var link = document.createElement("link");
+
+	options.attrs.type = "text/css";
+	options.attrs.rel = "stylesheet";
+
+	addAttrs(link, options.attrs);
+	insertStyleElement(options, link);
+
+	return link;
+}
+
+function addAttrs (el, attrs) {
+	Object.keys(attrs).forEach(function (key) {
+		el.setAttribute(key, attrs[key]);
+	});
+}
+
+function addStyle (obj, options) {
+	var style, update, remove, result;
+
+	// If a transform function was defined, run it on the css
+	if (options.transform && obj.css) {
+	    result = options.transform(obj.css);
+
+	    if (result) {
+	    	// If transform returns a value, use that instead of the original css.
+	    	// This allows running runtime transformations on the css.
+	    	obj.css = result;
+	    } else {
+	    	// If the transform function returns a falsy value, don't add this css.
+	    	// This allows conditional loading of css
+	    	return function() {
+	    		// noop
+	    	};
+	    }
+	}
+
+	if (options.singleton) {
+		var styleIndex = singletonCounter++;
+
+		style = singleton || (singleton = createStyleElement(options));
+
+		update = applyToSingletonTag.bind(null, style, styleIndex, false);
+		remove = applyToSingletonTag.bind(null, style, styleIndex, true);
+
+	} else if (
+		obj.sourceMap &&
+		typeof URL === "function" &&
+		typeof URL.createObjectURL === "function" &&
+		typeof URL.revokeObjectURL === "function" &&
+		typeof Blob === "function" &&
+		typeof btoa === "function"
+	) {
+		style = createLinkElement(options);
+		update = updateLink.bind(null, style, options);
+		remove = function () {
+			removeStyleElement(style);
+
+			if(style.href) URL.revokeObjectURL(style.href);
+		};
+	} else {
+		style = createStyleElement(options);
+		update = applyToTag.bind(null, style);
+		remove = function () {
+			removeStyleElement(style);
+		};
+	}
+
+	update(obj);
+
+	return function updateStyle (newObj) {
+		if (newObj) {
+			if (
+				newObj.css === obj.css &&
+				newObj.media === obj.media &&
+				newObj.sourceMap === obj.sourceMap
+			) {
+				return;
+			}
+
+			update(obj = newObj);
+		} else {
+			remove();
+		}
+	};
+}
+
+var replaceText = (function () {
+	var textStore = [];
+
+	return function (index, replacement) {
+		textStore[index] = replacement;
+
+		return textStore.filter(Boolean).join('\n');
+	};
+})();
+
+function applyToSingletonTag (style, index, remove, obj) {
+	var css = remove ? "" : obj.css;
+
+	if (style.styleSheet) {
+		style.styleSheet.cssText = replaceText(index, css);
+	} else {
+		var cssNode = document.createTextNode(css);
+		var childNodes = style.childNodes;
+
+		if (childNodes[index]) style.removeChild(childNodes[index]);
+
+		if (childNodes.length) {
+			style.insertBefore(cssNode, childNodes[index]);
+		} else {
+			style.appendChild(cssNode);
+		}
+	}
+}
+
+function applyToTag (style, obj) {
+	var css = obj.css;
+	var media = obj.media;
+
+	if(media) {
+		style.setAttribute("media", media)
+	}
+
+	if(style.styleSheet) {
+		style.styleSheet.cssText = css;
+	} else {
+		while(style.firstChild) {
+			style.removeChild(style.firstChild);
+		}
+
+		style.appendChild(document.createTextNode(css));
+	}
+}
+
+function updateLink (link, options, obj) {
+	var css = obj.css;
+	var sourceMap = obj.sourceMap;
+
+	/*
+		If convertToAbsoluteUrls isn't defined, but sourcemaps are enabled
+		and there is no publicPath defined then lets turn convertToAbsoluteUrls
+		on by default.  Otherwise default to the convertToAbsoluteUrls option
+		directly
+	*/
+	var autoFixUrls = options.convertToAbsoluteUrls === undefined && sourceMap;
+
+	if (options.convertToAbsoluteUrls || autoFixUrls) {
+		css = fixUrls(css);
+	}
+
+	if (sourceMap) {
+		// http://stackoverflow.com/a/26603875
+		css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
+	}
+
+	var blob = new Blob([css], { type: "text/css" });
+
+	var oldSrc = link.href;
+
+	link.href = URL.createObjectURL(blob);
+
+	if(oldSrc) URL.revokeObjectURL(oldSrc);
+}
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports) {
+
+
+/**
+ * When source maps are enabled, `style-loader` uses a link element with a data-uri to
+ * embed the css on the page. This breaks all relative urls because now they are relative to a
+ * bundle instead of the current page.
+ *
+ * One solution is to only use full urls, but that may be impossible.
+ *
+ * Instead, this function "fixes" the relative urls to be absolute according to the current page location.
+ *
+ * A rudimentary test suite is located at `test/fixUrls.js` and can be run via the `npm test` command.
+ *
+ */
+
+module.exports = function (css) {
+  // get current location
+  var location = typeof window !== "undefined" && window.location;
+
+  if (!location) {
+    throw new Error("fixUrls requires window.location");
+  }
+
+	// blank or null?
+	if (!css || typeof css !== "string") {
+	  return css;
+  }
+
+  var baseUrl = location.protocol + "//" + location.host;
+  var currentDir = baseUrl + location.pathname.replace(/\/[^\/]*$/, "/");
+
+	// convert each url(...)
+	/*
+	This regular expression is just a way to recursively match brackets within
+	a string.
+
+	 /url\s*\(  = Match on the word "url" with any whitespace after it and then a parens
+	   (  = Start a capturing group
+	     (?:  = Start a non-capturing group
+	         [^)(]  = Match anything that isn't a parentheses
+	         |  = OR
+	         \(  = Match a start parentheses
+	             (?:  = Start another non-capturing groups
+	                 [^)(]+  = Match anything that isn't a parentheses
+	                 |  = OR
+	                 \(  = Match a start parentheses
+	                     [^)(]*  = Match anything that isn't a parentheses
+	                 \)  = Match a end parentheses
+	             )  = End Group
+              *\) = Match anything and then a close parens
+          )  = Close non-capturing group
+          *  = Match anything
+       )  = Close capturing group
+	 \)  = Match a close parens
+
+	 /gi  = Get all matches, not the first.  Be case insensitive.
+	 */
+	var fixedCss = css.replace(/url\s*\(((?:[^)(]|\((?:[^)(]+|\([^)(]*\))*\))*)\)/gi, function(fullMatch, origUrl) {
+		// strip quotes (if they exist)
+		var unquotedOrigUrl = origUrl
+			.trim()
+			.replace(/^"(.*)"$/, function(o, $1){ return $1; })
+			.replace(/^'(.*)'$/, function(o, $1){ return $1; });
+
+		// already a full url? no change
+		if (/^(#|data:|http:\/\/|https:\/\/|file:\/\/\/)/i.test(unquotedOrigUrl)) {
+		  return fullMatch;
+		}
+
+		// convert the url to a full url
+		var newUrl;
+
+		if (unquotedOrigUrl.indexOf("//") === 0) {
+		  	//TODO: should we add protocol?
+			newUrl = unquotedOrigUrl;
+		} else if (unquotedOrigUrl.indexOf("/") === 0) {
+			// path should be relative to the base url
+			newUrl = baseUrl + unquotedOrigUrl; // already starts with '/'
+		} else {
+			// path should be relative to current directory
+			newUrl = currentDir + unquotedOrigUrl.replace(/^\.\//, ""); // Strip leading './'
+		}
+
+		// send back the fixed url(...)
+		return "url(" + JSON.stringify(newUrl) + ")";
+	});
+
+	// send back the fixed css
+	return fixedCss;
+};
+
 
 /***/ })
 /******/ ]);
